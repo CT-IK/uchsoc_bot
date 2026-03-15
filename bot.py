@@ -11,6 +11,9 @@ from handlers.FAQ import faq_router
 from handlers.FAQ_command import command_faq_router
 from handlers.broadcast import broadcast_router
 from handlers.urgent_messages import urgent_messages_router
+from handlers.shelters_brief import sh_router
+from handlers.request_status import notif_router
+from handlers.npb_update import npb_router
 import database.models
 
 logging.basicConfig(level=logging.INFO)
@@ -24,6 +27,9 @@ dp.include_router(faq_router)
 dp.include_router(command_faq_router)
 dp.include_router(broadcast_router)
 dp.include_router(urgent_messages_router)
+dp.include_router(sh_router)
+dp.include_router(notif_router)
+dp.include_router(npb_router)
 
 
 async def main():

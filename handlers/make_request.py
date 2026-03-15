@@ -10,14 +10,17 @@ from database.models import User
 req_router = Router()
 first_dep_list = ['2131378607']
 sec_dep_list = []
-third_dep_list = []
+third_dep_list = ['2131378607']
 
 class Message_maker(StatesGroup):
+    user_id = State()
     department = State()
     content = State()
 
 @req_router.message(Command('make_request'))
 async def set_department(message:types.Message, state:FSMContext):
+    await message.answer('Я живой')
+    await state.update_data(user_id=message.from_user.id)
     kb = [
         [types.KeyboardButton(text='Какое-то подразделение')],
         [types.KeyboardButton(text='Еще какое-то подразделение')],
@@ -25,8 +28,8 @@ async def set_department(message:types.Message, state:FSMContext):
     ]
     keyboard = types.ReplyKeyboardMarkup(keyboard=kb,
                                          resize_keyboard=True,
-                                         input_field_placeholder='Выберите одно из них перед отправкой запроса:')
-    await message.answer('Вы можете отправить жалобу следующим подразделениям УСК:\n' \
+                                         input_field_placeholder='Выберите одно из подразделений:')
+    await message.answer('Вы можете отправить жалобу следующим подразделениям УСК:\n\n' \
     '+ какое-то подразделение - занимается тем-то, тем-то, тем-то\n' \
     '+ еще какое-то подразделение - занимается этим, этим и этим\n' \
     '+ и еще одно подразделение - отважно выполняет это, это и это', reply_markup=keyboard)
@@ -44,7 +47,8 @@ async def ready_to_send(message:types.Message, state:FSMContext):
     await state.update_data(content=message.text)
     await message.answer('Запрос сохранен!')
     data = await state.get_data()
-    request = f'Запрос к {data.get('department')}:\n\n{data.get("content")}'
+    request = f'Запрос к {data.get('department')}:\n\n{data.get("content")}\n\n' \
+            f'ID отправителя: {data.get('user_id')}'
     async for session in get_session():
         if data.get('department') == 'Какое-то подразделение':
             recipients = first_dep_list
