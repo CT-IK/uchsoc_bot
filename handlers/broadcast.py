@@ -6,6 +6,7 @@ from aiogram.fsm.state import StatesGroup
 from aiogram.fsm.context import FSMContext
 from database.crud import get_all_users
 from database.engine import get_session
+from keyboards.inline import back_start_keyboard
 
 broadcast_router = Router()
 
@@ -18,9 +19,9 @@ class Messages_maker(StatesGroup): # MessageMaker
     rts = State()
 
 
-@broadcast_router.message(Command("broadcast"))
-async def add_content(message:types.Message, state:FSMContext):
-    await message.answer("Введите текст анонса: ")
+@broadcast_router.callback_query(lambda c: c.data == "broadcast_pressed")
+async def add_content(callback: types.CallbackQuery, state:FSMContext):
+    await callback.message.answer("Введите текст анонса: ")
     await state.set_state(Messages_maker.info)
 
 @broadcast_router.message(Messages_maker.info, F.text)
@@ -50,7 +51,7 @@ async def broadcast_cmd(message: types.Message, state:FSMContext):
     message_for_users = data.get('info')
     
     if str(user_id) not in admins_list:
-        await message.reply('Извините, Вы не админ!')
+        await message.reply('Извините, Вы не админ!', reply_markup=back_start_keyboard())
         return
     
     async for session in get_session():
@@ -69,7 +70,7 @@ async def broadcast_cmd(message: types.Message, state:FSMContext):
 
         await message.reply(f'Рассылка завершена!\n\n'
                             f'Успешно разослано: {sent_count}\n'
-                            f'Не получилось разослать: {failed_count}')
+                            f'Не получилось разослать: {failed_count}', reply_markup=back_start_keyboard())
         await state.clear()
 
 @broadcast_router.message(Messages_maker.rts, F.text != '-')
@@ -81,7 +82,7 @@ async def broadcast_cmd(message: types.Message, state:FSMContext):
     image_for_users = data.get('imge')
     
     if str(user_id) not in admins_list:
-        await message.reply('Извините, Вы не админ!')
+        await message.reply('Извините, Вы не админ!', reply_markup=back_start_keyboard())
         return
     
     async for session in get_session():
@@ -100,5 +101,5 @@ async def broadcast_cmd(message: types.Message, state:FSMContext):
 
         await message.reply(f'Рассылка завершена!\n\n'
                             f'Успешно разослано: {sent_count}\n'
-                            f'Не получилось разослать: {failed_count}')
+                            f'Не получилось разослать: {failed_count}', reply_markup=back_start_keyboard())
         await state.clear()

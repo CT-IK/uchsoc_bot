@@ -7,8 +7,8 @@ from handlers.menu_processing import get_faq_menu_content
 
 command_faq_router = Router()
 
-@command_faq_router.message(Command('faq'))
-async def faq_cmd(message:types.Message):
+@command_faq_router.callback_query(lambda c: c.data == "faq_pressed")
+async def faq_cmd(callback: types.CallbackQuery):
     media, reply_markup = await get_faq_menu_content(level=0)
 
-    await message.answer_photo(media.media, caption=media.caption, reply_markup=reply_markup)
+    await callback.message.answer_photo(media.media, caption=media.caption, reply_markup=reply_markup)
