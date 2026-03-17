@@ -15,9 +15,9 @@ admin_list = ['2131378607', '2011316482']
 class Npb_upd(StatesGroup):
     content = State()
 
-@npb_router.message(Command('npb_update'))
-async def set_recipient(message:types.Message, state:FSMContext):
-    await message.answer('Введите содержание изменения в НПБ: ')
+@npb_router.callback_query(lambda c: c.data == 'npb_update_pressed')
+async def set_recipient(callback: types.CallbackQuery, state:FSMContext):
+    await callback.message.answer('Введите содержание изменения в НПБ: ')
     await state.set_state(Npb_upd.content)
 
 @npb_router.message(Npb_upd.content, F.text)

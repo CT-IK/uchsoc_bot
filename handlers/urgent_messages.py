@@ -6,6 +6,7 @@ from aiogram.fsm.state import StatesGroup
 from aiogram.fsm.context import FSMContext
 from database.crud import get_all_users
 from database.engine import get_session
+from keyboards.inline import back_start_keyboard
 
 urgent_messages_router = Router()
 
@@ -17,9 +18,9 @@ class Urgent_messages_maker(StatesGroup): # MessageMaker
     rts = State()
 
 
-@urgent_messages_router.message(Command("urgent_messages"))
-async def add_content(message:types.Message, state:FSMContext):
-    await message.answer("Введите текст срочного сообщения: ")
+@urgent_messages_router.callback_query(lambda c: c.data == 'urgent_messages_pressed')
+async def add_content(callback: types.CallbackQuery, state:FSMContext):
+    await callback.message.answer("Введите текст срочного сообщения: ")
     await state.set_state(Urgent_messages_maker.info)
 
 @urgent_messages_router.message(Urgent_messages_maker.info, F.text)
@@ -36,7 +37,7 @@ async def broadcast_cmd(message: types.Message, state:FSMContext):
     message_for_users = data.get('info')
     
     if str(user_id) not in admins_list:
-        await message.reply('Извините, Вы не админ!')
+        await message.reply('Извините, Вы не админ!', reply_markup=back_start_keyboard())
         return
     
     async for session in get_session():
@@ -55,5 +56,5 @@ async def broadcast_cmd(message: types.Message, state:FSMContext):
 
         await message.reply(f'Рассылка завершена!\n\n'
                             f'Успешно разослано: {sent_count}\n'
-                            f'Не получилось разослать: {failed_count}')
+                            f'Не получилось разослать: {failed_count}', reply_markup=back_start_keyboard())
         await state.clear()

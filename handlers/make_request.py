@@ -17,9 +17,9 @@ class Message_maker(StatesGroup):
     department = State()
     content = State()
 
-@req_router.message(Command('make_request'))
-async def set_department(message:types.Message, state:FSMContext):
-    await state.update_data(user_id=message.from_user.id)
+@req_router.callback_query(lambda c: c.data == 'make_request_pressed')
+async def set_department(callback:types.CallbackQuery, state:FSMContext):
+    await state.update_data(user_id=callback.message.from_user.id)
     kb = [
         [types.KeyboardButton(text='Какое-то подразделение')],
         [types.KeyboardButton(text='Еще какое-то подразделение')],
@@ -28,7 +28,7 @@ async def set_department(message:types.Message, state:FSMContext):
     keyboard = types.ReplyKeyboardMarkup(keyboard=kb,
                                          resize_keyboard=True,
                                          input_field_placeholder='Выберите одно из подразделений:')
-    await message.answer('Вы можете отправить жалобу следующим подразделениям УСК:\n\n' \
+    await callback.message.answer('Вы можете отправить жалобу следующим подразделениям УСК:\n\n' \
     '+ какое-то подразделение - занимается тем-то, тем-то, тем-то\n' \
     '+ еще какое-то подразделение - занимается этим, этим и этим\n' \
     '+ и еще одно подразделение - отважно выполняет это, это и это', reply_markup=keyboard)

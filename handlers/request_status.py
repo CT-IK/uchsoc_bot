@@ -14,9 +14,9 @@ class Status_notif(StatesGroup):
     recip_id = State()
     content = State()
 
-@notif_router.message(Command('request_status'))
-async def set_recipient(message:types.Message, state:FSMContext):
-    await message.answer('Введите ID студента: ')
+@notif_router.callback_query(lambda c: c.data == 'request_status_pressed')
+async def set_recipient(callback: types.CallbackQuery, state:FSMContext):
+    await callback.message.answer('Введите ID студента: ')
     await state.set_state(Status_notif.recip_id)
 
 @notif_router.message(Status_notif.recip_id, F.text)

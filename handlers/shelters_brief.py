@@ -35,16 +35,16 @@ class Brief_maker(StatesGroup):
 
 
 
-@sh_router.message(Command('shelters_brief'))
-async def add_customer(message:types.Message, state:FSMContext):
-    await message.answer('Студенческая группа отвечает за:\n\n' \
+@sh_router.callback_query(lambda c: c.data == 'shelters_brief_pressed')
+async def add_customer(callback:types.CallbackQuery, state:FSMContext):
+    await callback.message.answer('Студенческая группа отвечает за:\n\n' \
     '- явку участников и соблюдение правил.\n\n' \
     'УСК отвечает за:\n\n' \
     '- инструктаж и контроль соблюдения правил;\n' \
     '- выделение сопровождение;\n' \
     '- финальную отчётность и общую координацию.\n\n' \
     'Сбор и закупку помощи (корм, вещи и т.д.) осуществляется совместно')
-    await message.answer('Введите ФИО заказчика: ')
+    await callback.message.answer('Введите ФИО заказчика: ')
     await state.set_state(Brief_maker.customer)
 
 @sh_router.message(Brief_maker.customer, F.text)
