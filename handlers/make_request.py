@@ -19,7 +19,6 @@ class Message_maker(StatesGroup):
 
 @req_router.callback_query(lambda c: c.data == "make_request_pressed")
 async def set_department(callback: types.CallbackQuery, state:FSMContext):
-    await callback.message.answer('Я живой')
     await state.update_data(user_id=callback.message.from_user.id)
     kb = [
         [types.KeyboardButton(text='Какое-то подразделение')],
