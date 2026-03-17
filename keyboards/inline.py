@@ -28,16 +28,25 @@ def faq_all(*, level: int, sizes: tuple[int] = (2,)):
 
 def get_start_keyboard():
     buttons = [
-        [InlineKeyboardButton(text="Запрос или жалоба", callback_data="make_request_pressed")],
+        [InlineKeyboardButton(text="Написать запрос/жалобу", callback_data="make_request_pressed")],
         [InlineKeyboardButton(text="FAQ", callback_data="faq_pressed")],
-        [InlineKeyboardButton(text="Сделать анонс", callback_data="broadcast_pressed")],
-        [InlineKeyboardButton(text="Срочное сообщение", callback_data="urgent_messages_pressed")],
-        [InlineKeyboardButton(text="Бриф на выезды в приюты", callback_data="shelters_brief_pressed")],
-        [InlineKeyboardButton(text="Оповестить студента о статусе его запроса или жалобы", callback_data="request_status_pressed")],
-        [InlineKeyboardButton(text="Предупредить об изменениях в НПБ", callback_data="npb_update_pressed")]
+        [InlineKeyboardButton(text="Бриф на выезды в приюты", callback_data="shelters_brief_pressed")]
     ]
     keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
     return keyboard
+
+def get_start_keyboard_full():
+    adm_buttons = [
+        [InlineKeyboardButton(text="Написать запрос/жалобу", callback_data="make_request_pressed")],
+        [InlineKeyboardButton(text="FAQ", callback_data="faq_pressed")],
+        [InlineKeyboardButton(text="Бриф на выезды в приюты", callback_data="shelters_brief_pressed")],
+        [InlineKeyboardButton(text="Сделать анонс", callback_data="broadcast_pressed")],
+        [InlineKeyboardButton(text="Срочное сообщение", callback_data="urgent_messages_pressed")],
+        [InlineKeyboardButton(text="Оповестить студента о статусе запроса/жалобы", callback_data="request_status_pressed")],
+        [InlineKeyboardButton(text="Предупредить об изменениях в НПБ", callback_data="npb_update_pressed")]
+    ]
+    keyboard_adm = InlineKeyboardMarkup(inline_keyboard=adm_buttons)
+    return keyboard_adm
 
 def back_start_keyboard():
     buttons = [
