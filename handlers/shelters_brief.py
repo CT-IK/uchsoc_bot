@@ -12,6 +12,8 @@ from handlers.make_request import *
 
 sh_router = Router()
 responsible_dep = third_dep_list
+uni_kb = [[types.KeyboardButton(text='Назад')]]
+uni_keyboard = types.ReplyKeyboardMarkup(keyboard=uni_kb, resize_keyboard=True)
 
 class Brief_maker(StatesGroup):
     customer = State()
@@ -23,13 +25,15 @@ class Brief_maker(StatesGroup):
     additional = State()
     rts = State()
 
-# async def show_back_button(message:types.Message):
-#     builder = InlineKeyboardBuilder()
-#     builder.add(types.InlineKeyboardButton(
-#         text='назад',
-#         value='назад')
-#     )
-#     await message.answer('Если хотите вернуться, нажмите кнопку: ')
+    texts = {
+        'Brief_maker:customer': 'Введите ФИО заказчика заново:',
+        'Brief_maker:customers_tg': 'Введите tg заказчика заново:',
+        'Brief_maker:faculty': 'Введите факультет заново:',
+        'Brief_maker:num_of_people': 'Введите количество людей заново:',
+        'Brief_maker:date': 'Введите желаемую дату заново:'
+    }
+
+
 
 @sh_router.message(Command('shelters_brief'))
 async def add_customer(message:types.Message, state:FSMContext):
@@ -46,10 +50,10 @@ async def add_customer(message:types.Message, state:FSMContext):
 @sh_router.message(Brief_maker.customer, F.text)
 async def add_customer(message:types.Message, state:FSMContext):
     await state.update_data(customer=message.text)
-    await message.answer('Сохранено!\nВведите tg заказчика: ')
+    await message.answer('Сохранено!\nВведите tg заказчика: ', reply_markup=uni_keyboard)
     await state.set_state(Brief_maker.customers_tg)
 
-@sh_router.message(Brief_maker.customers_tg, F.text)
+@sh_router.message(Brief_maker.customers_tg, F.text!="Назад")
 async def set_department(message:types.Message, state:FSMContext):
     kb = [
         [types.KeyboardButton(text='ВШУ')],
@@ -59,7 +63,8 @@ async def set_department(message:types.Message, state:FSMContext):
         [types.KeyboardButton(text='СНиМК')],
         [types.KeyboardButton(text='НАБ')],
         [types.KeyboardButton(text='Финфак')],
-        [types.KeyboardButton(text='Юрфак')]
+        [types.KeyboardButton(text='Юрфак')],
+        [types.KeyboardButton(text='Назад')]
     ]
     keyboard = types.ReplyKeyboardMarkup(keyboard=kb,
                                          resize_keyboard=True)
@@ -67,31 +72,32 @@ async def set_department(message:types.Message, state:FSMContext):
     await message.answer('Сохранено!\nВыберите факультет: ', reply_markup=keyboard)
     await state.set_state(Brief_maker.faculty)
 
-@sh_router.message(Brief_maker.faculty, F.text)
+@sh_router.message(Brief_maker.faculty, F.text!="Назад")
 async def add_customer(message:types.Message, state:FSMContext):
     await state.update_data(faculty=message.text)
-    await message.answer('Сохранено!\nВведите количество людей в группе: ', reply_markup=types.ReplyKeyboardRemove())
+    await message.answer('Сохранено!\nВведите количество людей в группе: ', reply_markup=uni_keyboard)
     await state.set_state(Brief_maker.num_of_people)
 
-@sh_router.message(Brief_maker.num_of_people, F.text)
+@sh_router.message(Brief_maker.num_of_people, F.text!="Назад")
 async def add_customer(message:types.Message, state:FSMContext):
     await state.update_data(num_of_people=message.text)
-    await message.answer('Сохранено!\nВведите желаемую дату выезда (в формате ДД.ММ): ')
+    await message.answer('Сохранено!\nВведите желаемую дату выезда (в формате ДД.ММ): ', reply_markup=uni_keyboard)
     await state.set_state(Brief_maker.date)
 
-@sh_router.message(Brief_maker.date, F.text)
+@sh_router.message(Brief_maker.date, F.text!="Назад")
 async def add_customer(message:types.Message, state:FSMContext):
     await state.update_data(date=message.text)
     kb = [
         [types.KeyboardButton(text='Да')],
-        [types.KeyboardButton(text='Нет')]
+        [types.KeyboardButton(text='Нет')],
+        [types.KeyboardButton(text='Назад')]
     ]
     keyboard = types.ReplyKeyboardMarkup(keyboard=kb,
                                          resize_keyboard=True)
-    await message.answer('Сохранено!\nВы хотите ввести дополнительную информацию?',reply_markup=keyboard)
+    await message.answer('Сохранено!\nВы хотите ввести дополнительную информацию?', reply_markup=keyboard)
     await state.set_state(Brief_maker.state_of_add)
 
-@sh_router.message(Brief_maker.state_of_add, F.text)
+@sh_router.message(Brief_maker.state_of_add, F.text!="Назад")
 async def add_customer(message:types.Message, state:FSMContext):
     await state.update_data(state_of_add=message.text)
     if message.text == 'Да':
@@ -131,9 +137,9 @@ async def add_customer(message:types.Message, state:FSMContext):
         await message.reply('Ваша заявка на выезд в приют отправлена!')
         await state.clear()
 
-@sh_router.message(StateFilter('*'), Command("назад"))
-@sh_router.callback_query(StateFilter('*'), F.text.lower() == 'назад')
-async def back_step_handler(message:types.Message, state:FSMContext, callback:types.CallbackQuery):
+# @sh_router.message(StateFilter('*'), Command("Назад"))
+@sh_router.message(StateFilter('*'), F.text == 'Назад')
+async def back_step_handler(message:types.Message, state:FSMContext):
     current_state = await state.get_state()
 
     if current_state == Brief_maker.customer:
@@ -152,6 +158,6 @@ async def back_step_handler(message:types.Message, state:FSMContext, callback:ty
     for step in Brief_maker.__all_states__:
         if step.state == current_state:
             await state.set_state(previous)
-            await message.answer(f"Предыдущий шаг отменен\n {Brief_maker.texts[previous.state]}")
+            await message.answer(f"Предыдущий шаг отменен\n{Brief_maker.texts[previous.state]}")
             return
         previous = step

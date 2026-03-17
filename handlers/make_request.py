@@ -19,7 +19,6 @@ class Message_maker(StatesGroup):
 
 @req_router.message(Command('make_request'))
 async def set_department(message:types.Message, state:FSMContext):
-    await message.answer('Я живой')
     await state.update_data(user_id=message.from_user.id)
     kb = [
         [types.KeyboardButton(text='Какое-то подразделение')],
